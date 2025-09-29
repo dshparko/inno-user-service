@@ -1,8 +1,9 @@
-package com.innowise.userservice.dto.card;
+package com.innowise.userservice.dto;
 
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
 import java.time.LocalDate;
 
@@ -15,10 +16,12 @@ import java.time.LocalDate;
  * @Date 08.09.2025 21:30
  * @Version 1.0
  */
-public record UpdateCardRequest(
-        @NotNull(message = "User ID is required")
+public record CardDto(
+        @NotNull(message = "Сard ID is required")
         Long id,
+
         @NotBlank(message = "Card number is required")
+        @Pattern(regexp = "^\\d{13,19}$", message = "The number should be between 13 and 19 digits")
         String number,
 
         @NotBlank(message = "Holder name is required")
