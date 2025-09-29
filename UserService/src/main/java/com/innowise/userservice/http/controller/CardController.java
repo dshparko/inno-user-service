@@ -1,11 +1,14 @@
 package com.innowise.userservice.http.controller;
 
-import com.innowise.userservice.dto.card.CardResponse;
-import com.innowise.userservice.dto.card.CreateCardRequest;
-import com.innowise.userservice.dto.card.UpdateCardRequest;
-import com.innowise.userservice.service.CardService;
+import com.innowise.userservice.dto.CardDto;
+import com.innowise.userservice.dto.CardFilterDto;
+import com.innowise.userservice.dto.UserDto;
+import com.innowise.userservice.service.impl.CardService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -16,14 +19,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 /**
  * @ClassName CardController
- * @Description REST controller for managing {@link com.innowise.userservice.database.entity.Card} entities and their associated {@link CardResponse} data.
+ * @Description REST controller for managing {@link com.innowise.userservice.database.entity.Card} entities and their associated {@link CardDto} data.
  * Provides endpoints for user CRUD operations and card retrieval.
  * @Author dshparko
  * @Date 12.09.2025 20:49
@@ -37,55 +39,52 @@ public class CardController {
 
     private final CardService cardService;
 
-    /**
-     * Retrieves a card by its unique identifier.
-     *
-     * @param id the ID of the card to retrieve
-     * @return {@link CardResponse} representing the card
-     */
-    @GetMapping("/{id}")
-    public ResponseEntity<CardResponse> cardById(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(cardService.findById(id));
-    }
 
     /**
-     * Retrieves all cards in the system.
+     * Retrieves users based on optional filters and pagination parameters.
      *
-     * @return list of {@link CardResponse} objects; 204 No Content if none found
+     * @param filter   optional filter criteria (email, id, ids)
+     * @param pageable pagination and sorting configuration
+     * @return paginated list of {@link UserDto} objects; 204 No Content if none found
+     */
+
+    /**
+     * Retrieves users based on optional filters and pagination parameters.
+     *
+     * @param filter   optional filter criteria (email, id, ids)
+     * @param pageable pagination and sorting configuration
+     * @return paginated list of {@link UserDto} objects; 204 No Content if none found
      */
     @GetMapping
-    public ResponseEntity<List<CardResponse>> findAll() {
-        List<CardResponse> cards = cardService.findAll();
-        if (cards.isEmpty()) {
-            return ResponseEntity.noContent().build();
+    public ResponseEntity<Page<CardDto>> search(CardFilterDto filter, Pageable pageable) {
+        Page<CardDto> page;
+
+        if (filter.id() != null) {
+            CardDto card = cardService.findById(filter.id());
+            List<CardDto> list = card != null ? List.of(card) : List.of();
+            page = new PageImpl<>(list, pageable, list.size());
+        } else if (filter.userId() != null) {
+            List<CardDto> cards = cardService.findByUserId(filter.userId());
+            page = new PageImpl<>(cards, pageable, cards.size());
+        } else {
+            page = cardService.findAll(filter, pageable);
         }
-        return ResponseEntity.ok(cards);
+
+        return page.isEmpty()
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.ok(page);
     }
 
-    /**
-     * Retrieves multiple cards by their IDs.
-     *
-     * @param ids list of card IDs to retrieve
-     * @return list of {@link CardResponse} objects; 204 No Content if none found
-     */
-    @GetMapping("/batch")
-    public ResponseEntity<List<CardResponse>> findCardsByIds(@RequestParam List<Long> ids) {
-        List<CardResponse> cards = cardService.findCardsByIds(ids);
-        if (cards.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(cards);
-    }
 
     /**
      * Creates a new card.
      *
      * @param request DTO containing card creation data
-     * @return {@link CardResponse} representing the newly created card
+     * @return {@link CardDto} representing the newly created card
      */
     @PostMapping
-    public ResponseEntity<CardResponse> createCard(@RequestBody @Valid CreateCardRequest request) {
-        return ResponseEntity.ok(cardService.createCard(request));
+    public ResponseEntity<CardDto> createCard(@RequestBody @Valid CardDto request) {
+        return ResponseEntity.ok(cardService.create(request));
     }
 
     /**
@@ -95,8 +94,8 @@ public class CardController {
      * @return 200 OK if update was successful
      */
     @PutMapping
-    public ResponseEntity<CardResponse> updateCard(@RequestBody @Valid UpdateCardRequest request) {
-        cardService.updateCard(request);
+    public ResponseEntity<CardDto> updateCard(@RequestBody @Valid CardDto request) {
+        cardService.update(request);
         return ResponseEntity.ok().build();
     }
 
@@ -107,20 +106,8 @@ public class CardController {
      * @return 200 OK if deletion was successful
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<HttpStatus> deleteCard(@PathVariable("id") Long id) {
-        cardService.deleteById(id);
+    public ResponseEntity<HttpStatus> delete(@PathVariable("id") Long id) {
+        cardService.delete(id);
         return ResponseEntity.ok().build();
-    }
-
-    /**
-     * Retrieves all cards associated with a specific user.
-     *
-     * @param userId the ID of the user whose cards to retrieve
-     * @return list of {@link CardResponse} objects linked to the user
-     */
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<CardResponse>> getUserCards(@PathVariable Long userId) {
-        List<CardResponse> cards = cardService.findCardsByUserId(userId);
-        return ResponseEntity.ok(cards);
     }
 }

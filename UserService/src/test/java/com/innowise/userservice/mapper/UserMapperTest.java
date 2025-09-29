@@ -2,9 +2,7 @@ package com.innowise.userservice.mapper;
 
 import com.innowise.userservice.database.entity.Card;
 import com.innowise.userservice.database.entity.User;
-import com.innowise.userservice.dto.user.CreateUserRequest;
-import com.innowise.userservice.dto.user.UserResponse;
-import com.innowise.userservice.dto.user.UserWithCardsResponse;
+import com.innowise.userservice.dto.UserDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +32,7 @@ class UserMapperTest {
         user.setEmail("darya@example.com");
         user.setBirthDate(LocalDate.of(1990, 1, 1));
 
-        UserResponse response = userMapper.mapToResponse(user);
+        UserDto response = userMapper.mapToDto(user);
 
         assertThat(response.id()).isEqualTo(1L);
         assertThat(response.name()).isEqualTo("Darya");
@@ -46,11 +44,13 @@ class UserMapperTest {
     @Test
     @DisplayName("mapToEntity should map CreateUserRequest to User correctly")
     void mapToEntity_shouldMapCorrectly() {
-        CreateUserRequest request = new CreateUserRequest(
+        UserDto request = new UserDto(
+                1L,
                 "Darya",
                 "Shparko",
                 "darya@example.com",
-                LocalDate.of(1990, 1, 1)
+                LocalDate.of(1990, 1, 1),
+                List.of()
         );
 
         User user = userMapper.mapToEntity(request);
@@ -79,7 +79,7 @@ class UserMapperTest {
         user.setBirthDate(LocalDate.of(1990, 1, 1));
         user.setUserCards(List.of(card));
 
-        UserWithCardsResponse response = userMapper.mapToUserWithCards(user);
+        UserDto response = userMapper.mapToDto(user);
 
         assertThat(response.id()).isEqualTo(1L);
         assertThat(response.cards().size() == 1);
@@ -97,7 +97,7 @@ class UserMapperTest {
         user.setBirthDate(LocalDate.of(1990, 1, 1));
         user.setUserCards(List.of());
 
-        List<UserWithCardsResponse> responses = userMapper.mapToUserWithCardsResponseList(List.of(user));
+        List<UserDto> responses = userMapper.mapToDtoList(List.of(user));
 
         assertThat(responses.size() == 1);
         assertThat(responses.getFirst().email()).isEqualTo("darya@example.com");

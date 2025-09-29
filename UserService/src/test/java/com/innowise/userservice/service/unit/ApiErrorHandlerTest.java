@@ -3,7 +3,7 @@ package com.innowise.userservice.service.unit;
 import com.innowise.userservice.dto.error.ErrorResponseDto;
 import com.innowise.userservice.dto.error.ValidationErrorDto;
 import com.innowise.userservice.http.exception.ApiErrorHandler;
-import com.innowise.userservice.http.exception.UserNotFoundException;
+import com.innowise.userservice.http.exception.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -55,7 +55,7 @@ class ApiErrorHandlerTest {
     @DisplayName("404 not found")
     void shouldReturn404WithErrorResponse() {
 
-        Exception ex = new UserNotFoundException("id", 42);
+        ResourceNotFoundException ex = new ResourceNotFoundException("User", 42);
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getRequestURI()).thenReturn("/users/42");
 
@@ -65,7 +65,7 @@ class ApiErrorHandlerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         Assertions.assertNotNull(response.getBody());
-        assertThat(response.getBody().error()).isEqualTo("User wasn't found with id: 42");
+        assertThat(response.getBody().error()).isEqualTo("User with identifier 42 wasn't found");
         assertThat(response.getBody().path()).isEqualTo("/users/42");
     }
 

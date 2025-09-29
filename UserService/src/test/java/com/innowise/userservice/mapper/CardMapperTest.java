@@ -2,8 +2,7 @@ package com.innowise.userservice.mapper;
 
 import com.innowise.userservice.database.entity.Card;
 import com.innowise.userservice.database.entity.User;
-import com.innowise.userservice.dto.card.CardResponse;
-import com.innowise.userservice.dto.card.CreateCardRequest;
+import com.innowise.userservice.dto.CardDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +23,7 @@ class CardMapperTest {
     private CardMapper cardMapper;
 
     @Test
-    @DisplayName("mapToResponse should map Card to CardResponse correctly")
+    @DisplayName("mapToResponse should map Card to CardDto correctly")
     void mapToResponse_shouldMapCorrectly() {
         User user = new User();
         user.setId(42L);
@@ -35,7 +34,7 @@ class CardMapperTest {
         card.setExpirationDate(LocalDate.of(2030, 12, 31));
         card.setUser(user);
 
-        CardResponse response = cardMapper.mapToResponse(card);
+        CardDto response = cardMapper.mapToDto(card);
 
         assertThat(response.id()).isEqualTo(1L);
         assertThat(response.number()).isEqualTo("1234567890123456");
@@ -44,9 +43,10 @@ class CardMapperTest {
     }
 
     @Test
-    @DisplayName("mapToEntity should map CreateCardRequest to Card correctly")
+    @DisplayName("mapToEntity should map CardDto to Card correctly")
     void mapToEntity_shouldMapCorrectly() {
-        CreateCardRequest request = new CreateCardRequest(
+        CardDto request = new CardDto(
+                1L,
                 "9876543210987654",
                 "Ivan Ivanov",
                 LocalDate.of(2028, 6, 15),
@@ -64,7 +64,7 @@ class CardMapperTest {
     }
 
     @Test
-    @DisplayName("mapToResponseList should map list of Cards to list of CardResponses")
+    @DisplayName("mapToResponseList should map list of Cards to list of CardDtos")
     void mapToResponseList_shouldMapListCorrectly() {
         User user = new User();
         user.setId(7L);
@@ -81,7 +81,7 @@ class CardMapperTest {
         card2.setExpirationDate(LocalDate.of(2026, 2, 2));
         card2.setUser(user);
 
-        List<CardResponse> responses = cardMapper.mapToResponseList(List.of(card1, card2));
+        List<CardDto> responses = cardMapper.mapToDtoList(List.of(card1, card2));
 
         assertThat(responses).hasSize(2);
         assertThat(responses.get(0).userId()).isEqualTo(7L);

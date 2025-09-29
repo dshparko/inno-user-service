@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @ClassName ApiErrorHandler
@@ -47,20 +48,21 @@ public class ApiErrorHandler {
     }
 
     /**
-     * Handles domain-specific not found exceptions such as {@link UserNotFoundException} and {@link CardNotFoundException}.
+     * Handles domain-specific not found exceptions such as {@link ResourceNotFoundException} .
      * Constructs a standardized {@link ErrorResponseDto} with HTTP 404 status.
      *
      * @param ex      the thrown exception
      * @param request the originating HTTP request
      * @return HTTP 404 Not Found with error details
      */
-    @ExceptionHandler({UserNotFoundException.class, CardNotFoundException.class})
-    public ResponseEntity<ErrorResponseDto> handleNotFound(Exception ex,
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleNotFound(ResourceNotFoundException ex,
                                                            HttpServletRequest request) {
         ErrorResponseDto response = new ErrorResponseDto(
                 HttpStatus.NOT_FOUND.value(),
                 ex.getMessage(),
-                request.getRequestURI()
+                request.getRequestURI(),
+                ex.getErrorId()
         );
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
@@ -80,10 +82,23 @@ public class ApiErrorHandler {
         ErrorResponseDto response = new ErrorResponseDto(
                 HttpStatus.BAD_REQUEST.value(),
                 ex.getMessage(),
-                request.getRequestURI()
+                request.getRequestURI(),
+                UUID.randomUUID()
         );
 
         return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(ModificationException.class)
+    public ResponseEntity<ErrorResponseDto> handleCardUpdateFailed(ModificationException ex,
+                                                                   HttpServletRequest request) {
+        ErrorResponseDto error = new ErrorResponseDto(
+                HttpStatus.CONFLICT.value(),
+                ex.getMessage(),
+                request.getRequestURI(),
+                ex.getErrorId()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
     /**
@@ -100,7 +115,8 @@ public class ApiErrorHandler {
         ErrorResponseDto response = new ErrorResponseDto(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 ex.getMessage(),
-                request.getRequestURI()
+                request.getRequestURI(),
+                UUID.randomUUID()
         );
 
         return ResponseEntity.internalServerError().body(response);

@@ -2,13 +2,10 @@ package com.innowise.userservice.service.integration;
 
 import com.innowise.userservice.database.entity.User;
 import com.innowise.userservice.database.repository.UserRepository;
-import com.innowise.userservice.dto.user.CreateUserRequest;
-import com.innowise.userservice.dto.user.UpdateUserRequest;
-import com.innowise.userservice.dto.user.UserResponse;
-import com.innowise.userservice.dto.user.UserWithCardsResponse;
-import com.innowise.userservice.http.exception.UserNotFoundException;
-import com.innowise.userservice.service.UserService;
+import com.innowise.userservice.dto.UserDto;
+import com.innowise.userservice.http.exception.ResourceNotFoundException;
 import com.innowise.userservice.service.config.IntegrationTestBase;
+import com.innowise.userservice.service.impl.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,20 +36,22 @@ class UserServiceTestIT extends IntegrationTestBase {
     @Test
     @DisplayName("Create user integration test")
     void createUser_ShouldPersistUser() {
-        CreateUserRequest request = new CreateUserRequest(
+        UserDto request = new UserDto(
+                1L,
                 "Darya",
                 "Shparko",
                 "darya@example.com",
-                LocalDate.of(1990, 1, 1)
+                LocalDate.of(1990, 1, 1),
+                List.of()
         );
 
-        UserResponse response = userService.createUser(request);
+        UserDto response = userService.create(request);
 
         assertNotNull(response.id());
         assertEquals("Darya", response.name());
 
         User persisted = userRepository.findById(response.id())
-                .orElseThrow(() -> new UserNotFoundException("id", response.id()));
+                .orElseThrow(() -> new ResourceNotFoundException("User", response.id()));
 
         assertEquals("darya@example.com", persisted.getEmail());
     }
@@ -67,7 +66,7 @@ class UserServiceTestIT extends IntegrationTestBase {
         user.setBirthDate(LocalDate.of(1992, 7, 7));
         User saved = userRepository.save(user);
 
-        UserWithCardsResponse response = userService.findById(saved.getId());
+        UserDto response = userService.findById(saved.getId());
 
         assertEquals("Maria", response.name());
         assertEquals("maria@example.com", response.email());
@@ -83,18 +82,19 @@ class UserServiceTestIT extends IntegrationTestBase {
         user.setBirthDate(LocalDate.of(1985, 5, 5));
         User saved = userRepository.save(user);
 
-        UpdateUserRequest request = new UpdateUserRequest(
+        UserDto request = new UserDto(
                 saved.getId(),
                 "IvanUpdated",
                 "PetrovUpdated",
                 "ivan.new@example.com",
-                LocalDate.of(1985, 5, 5)
+                LocalDate.of(1985, 5, 5),
+                List.of()
         );
 
-        userService.updateUser(request);
+        userService.update(request);
 
         User updated = userRepository.findById(saved.getId())
-                .orElseThrow(() -> new UserNotFoundException("id", saved.getId()));
+                .orElseThrow(() -> new ResourceNotFoundException("User", saved.getId()));
 
         assertEquals("IvanUpdated", updated.getName());
         assertEquals("ivan.new@example.com", updated.getEmail());
@@ -110,7 +110,7 @@ class UserServiceTestIT extends IntegrationTestBase {
         user.setBirthDate(LocalDate.of(1995, 3, 3));
         User saved = userRepository.save(user);
 
-        userService.deleteUser(saved.getId());
+        userService.delete(saved.getId());
 
         assertFalse(userRepository.findById(saved.getId()).isPresent());
     }
@@ -132,7 +132,7 @@ class UserServiceTestIT extends IntegrationTestBase {
 
         userRepository.saveAll(List.of(user1, user2));
 
-        List<UserWithCardsResponse> result = userService.findAll();
+        List<UserDto> result = userService.findAll();
 
         assertEquals(2, result.size());
     }

@@ -1,6 +1,7 @@
 package com.innowise.userservice.dto.error;
 
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 /**
  * @ClassName ErrorResponseDto
@@ -15,9 +16,10 @@ public record ErrorResponseDto(
         ZonedDateTime timestamp,
         int status,
         String error,
-        String path
+        String path,
+        UUID errorId
 ) {
-    public ErrorResponseDto(int status, String error, String path) {
-        this(ZonedDateTime.now(), status, error, path);
+    public ErrorResponseDto(int status, String error, String path, UUID errorId) {
+        this(ZonedDateTime.now(), status, error, path, errorId);
     }
 }

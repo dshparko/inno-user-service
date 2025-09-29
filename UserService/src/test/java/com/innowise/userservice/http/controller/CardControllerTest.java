@@ -1,15 +1,15 @@
 package com.innowise.userservice.http.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.innowise.userservice.dto.card.CardResponse;
-import com.innowise.userservice.dto.card.CreateCardRequest;
-import com.innowise.userservice.dto.card.UpdateCardRequest;
-import com.innowise.userservice.service.CardService;
+import com.innowise.userservice.dto.CardDto;
+import com.innowise.userservice.service.impl.CardService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -37,7 +37,7 @@ class CardControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private final CardResponse sampleCard = new CardResponse(
+    private final CardDto sampleCard = new CardDto(
             1L,
             "1234567890123456",
             "Ivan Ivanov",
@@ -50,26 +50,26 @@ class CardControllerTest {
     void getCardById_shouldReturnCard() throws Exception {
         Mockito.when(cardService.findById(1L)).thenReturn(sampleCard);
 
-        mockMvc.perform(get("/api/v1/cards/1"))
+        mockMvc.perform(get("/api/v1/cards?id=1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.number").value("1234567890123456"));
+                .andExpect(jsonPath("$.content[0].id").value(1L))
+                .andExpect(jsonPath("$.content[0].number").value("1234567890123456"));
     }
 
     @Test
     @DisplayName("GET /cards should return all cards")
     void findAll_shouldReturnList() throws Exception {
-        Mockito.when(cardService.findAll()).thenReturn(List.of(sampleCard));
+        Mockito.when(cardService.findAll(any(), any())).thenReturn(new PageImpl<>(List.of(sampleCard)));
 
         mockMvc.perform(get("/api/v1/cards"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1L));
+                .andExpect(jsonPath("$.content[0].id").value(1L));
     }
 
     @Test
     @DisplayName("GET /cards should return 204 if empty")
     void findAll_shouldReturnNoContent() throws Exception {
-        Mockito.when(cardService.findAll()).thenReturn(List.of());
+        Mockito.when(cardService.findAll(any(), any())).thenReturn(Page.empty());
 
         mockMvc.perform(get("/api/v1/cards"))
                 .andExpect(status().isNoContent());
@@ -78,24 +78,25 @@ class CardControllerTest {
     @Test
     @DisplayName("GET /cards/batch should return cards by IDs")
     void findCardsByIds_shouldReturnList() throws Exception {
-        Mockito.when(cardService.findCardsByIds(List.of(1L, 2L))).thenReturn(List.of(sampleCard));
+        Mockito.when(cardService.findAll(Mockito.any(), Mockito.any())).thenReturn(new PageImpl<>(List.of(sampleCard)));
 
-        mockMvc.perform(get("/api/v1/cards/batch?ids=1&ids=2"))
+        mockMvc.perform(get("/api/v1/cards?ids=1&ids=2"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1L));
+                .andExpect(jsonPath("$.content[0].id").value(1L));
     }
 
     @Test
     @DisplayName("POST /cards should create a card")
     void createCard_shouldReturnCreatedCard() throws Exception {
-        CreateCardRequest request = new CreateCardRequest(
+        CardDto request = new CardDto(
+                1L,
                 "1234567890123456",
                 "Ivan Ivanov",
                 LocalDate.of(2030, 12, 31),
                 42L
         );
 
-        Mockito.when(cardService.createCard(any())).thenReturn(sampleCard);
+        Mockito.when(cardService.create(any())).thenReturn(sampleCard);
 
         mockMvc.perform(post("/api/v1/cards")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -107,7 +108,7 @@ class CardControllerTest {
     @Test
     @DisplayName("PUT /cards should update a card")
     void updateCard_shouldReturnOk() throws Exception {
-        UpdateCardRequest request = new UpdateCardRequest(
+        CardDto request = new CardDto(
                 1L,
                 "9999888877776666",
                 "Ivan Ivanov",
@@ -120,7 +121,7 @@ class CardControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
-        Mockito.verify(cardService).updateCard(request);
+        Mockito.verify(cardService).update(request);
     }
 
     @Test
@@ -129,16 +130,7 @@ class CardControllerTest {
         mockMvc.perform(delete("/api/v1/cards/1"))
                 .andExpect(status().isOk());
 
-        Mockito.verify(cardService).deleteById(1L);
+        Mockito.verify(cardService).delete(1L);
     }
 
-    @Test
-    @DisplayName("GET /cards/user/{userId} should return user's cards")
-    void getUserCards_shouldReturnList() throws Exception {
-        Mockito.when(cardService.findCardsByUserId(42L)).thenReturn(List.of(sampleCard));
-
-        mockMvc.perform(get("/api/v1/cards/user/42"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].userId").value(42L));
-    }
 }

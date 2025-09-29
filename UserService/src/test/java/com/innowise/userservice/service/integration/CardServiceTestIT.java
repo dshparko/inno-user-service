@@ -4,12 +4,10 @@ import com.innowise.userservice.database.entity.Card;
 import com.innowise.userservice.database.entity.User;
 import com.innowise.userservice.database.repository.CardRepository;
 import com.innowise.userservice.database.repository.UserRepository;
-import com.innowise.userservice.dto.card.CardResponse;
-import com.innowise.userservice.dto.card.CreateCardRequest;
-import com.innowise.userservice.dto.card.UpdateCardRequest;
-import com.innowise.userservice.http.exception.CardNotFoundException;
-import com.innowise.userservice.service.CardService;
+import com.innowise.userservice.dto.CardDto;
+import com.innowise.userservice.http.exception.ResourceNotFoundException;
 import com.innowise.userservice.service.config.IntegrationTestBase;
+import com.innowise.userservice.service.impl.CardService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,20 +49,21 @@ class CardServiceTestIT extends IntegrationTestBase {
         user.setBirthDate(LocalDate.of(1990, 1, 1));
         User savedUser = userRepository.save(user);
 
-        CreateCardRequest request = new CreateCardRequest(
+        CardDto request = new CardDto(
+                1L,
                 "1111222233334444",
                 "Darya",
                 LocalDate.of(2030, 1, 1),
                 savedUser.getId()
         );
 
-        CardResponse response = cardService.createCard(request);
+        CardDto response = cardService.create(request);
 
         assertNotNull(savedUser.getId());
         assertEquals("1111222233334444", response.number());
 
         Card persisted = cardRepository.findById(response.id())
-                .orElseThrow(() -> new CardNotFoundException(response.id()));
+                .orElseThrow(() -> new ResourceNotFoundException("Card", response.id()));
 
         assertEquals("Darya", persisted.getHolder());
         assertEquals(savedUser.getId(), persisted.getUser().getId());
@@ -87,7 +86,7 @@ class CardServiceTestIT extends IntegrationTestBase {
         card.setUser(user);
         cardRepository.save(card);
 
-        UpdateCardRequest request = new UpdateCardRequest(
+        CardDto request = new CardDto(
                 card.getId(),
                 "9999000011112222",
                 "Ivan Updated",
@@ -95,7 +94,7 @@ class CardServiceTestIT extends IntegrationTestBase {
                 user.getId()
         );
 
-        cardService.updateCard(request);
+        cardService.update(request);
 
         Card updated = cardRepository.findById(card.getId()).orElseThrow();
 
@@ -120,7 +119,7 @@ class CardServiceTestIT extends IntegrationTestBase {
         card.setUser(user);
         cardRepository.save(card);
 
-        cardService.deleteById(card.getId());
+        cardService.delete(card.getId());
 
         assertFalse(cardRepository.findById(card.getId()).isPresent());
     }
@@ -149,7 +148,7 @@ class CardServiceTestIT extends IntegrationTestBase {
 
         cardRepository.saveAll(List.of(card1, card2));
 
-        List<CardResponse> result = cardService.findAll();
+        List<CardDto> result = cardService.findAll();
 
         assertEquals(2, result.size());
     }

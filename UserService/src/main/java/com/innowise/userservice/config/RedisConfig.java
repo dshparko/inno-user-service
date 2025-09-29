@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.innowise.userservice.dto.user.UserWithCardsResponse;
+import com.innowise.userservice.dto.UserDto;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -54,8 +54,8 @@ public class RedisConfig {
      */
     @Bean
     public RedisCacheConfiguration cacheConfiguration() {
-        Jackson2JsonRedisSerializer<UserWithCardsResponse> serializer =
-                new Jackson2JsonRedisSerializer<>(redisObjectMapper(), UserWithCardsResponse.class);
+        Jackson2JsonRedisSerializer<UserDto> serializer =
+                new Jackson2JsonRedisSerializer<>(redisObjectMapper(), UserDto.class);
 
         return RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofMinutes(60))
@@ -84,6 +84,8 @@ public class RedisConfig {
                 .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true)
                 .serializationInclusion(JsonInclude.Include.NON_NULL)
                 .build()
-                .registerModule(new JavaTimeModule());
+                .registerModule(new JavaTimeModule())
+                .registerModule(new com.fasterxml.jackson.datatype.jdk8.Jdk8Module())
+                .registerModule(new com.fasterxml.jackson.module.paramnames.ParameterNamesModule());
     }
 }

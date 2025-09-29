@@ -2,16 +2,17 @@ package com.innowise.userservice.service.integration;
 
 import com.innowise.userservice.database.entity.User;
 import com.innowise.userservice.database.repository.UserRepository;
-import com.innowise.userservice.dto.user.UpdateUserRequest;
-import com.innowise.userservice.dto.user.UserWithCardsResponse;
-import com.innowise.userservice.service.UserService;
+import com.innowise.userservice.dto.UserDto;
 import com.innowise.userservice.service.config.IntegrationTestBase;
+import com.innowise.userservice.service.impl.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+
+import java.util.List;
 
 import static java.time.LocalDate.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -55,14 +56,14 @@ class UserServiceCacheTestIT extends IntegrationTestBase {
     @Test
     @DisplayName("findById should cache result")
     void findById_ShouldCacheResult() {
-        UserWithCardsResponse response1 = userService.findById(savedUser.getId());
+        UserDto response1 = userService.findById(savedUser.getId());
 
         assertEquals("Darya", response1.name());
 
         savedUser.setName("Changed");
         userRepository.save(savedUser);
 
-        UserWithCardsResponse response2 = userService.findById(savedUser.getId());
+        UserDto response2 = userService.findById(savedUser.getId());
         assertEquals("Darya", response2.name());
     }
 
@@ -71,17 +72,18 @@ class UserServiceCacheTestIT extends IntegrationTestBase {
     void updateUser_ShouldEvictCache() {
         userService.findById(savedUser.getId());
 
-        UpdateUserRequest updateRequest = new UpdateUserRequest(
+        UserDto updateRequest = new UserDto(
                 savedUser.getId(),
                 "Ivan",
                 "Ivanov",
                 "ivan@example.com",
-                of(1995, 5, 5)
+                of(1995, 5, 5),
+                List.of()
         );
 
-        userService.updateUser(updateRequest);
+        userService.update(updateRequest);
 
-        UserWithCardsResponse response = userService.findById(savedUser.getId());
+        UserDto response = userService.findById(savedUser.getId());
         assertEquals("Ivan", response.name());
         assertEquals("Ivanov", response.surname());
     }
@@ -91,7 +93,7 @@ class UserServiceCacheTestIT extends IntegrationTestBase {
     void deleteUser_ShouldEvictCache() {
         userService.findById(savedUser.getId());
 
-        userService.deleteUser(savedUser.getId());
+        userService.delete(savedUser.getId());
 
         assertFalse(userRepository.findById(savedUser.getId()).isPresent());
 

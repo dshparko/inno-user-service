@@ -1,8 +1,7 @@
 package com.innowise.userservice.mapper;
 
 import com.innowise.userservice.database.entity.Card;
-import com.innowise.userservice.dto.card.CardResponse;
-import com.innowise.userservice.dto.card.CreateCardRequest;
+import com.innowise.userservice.dto.CardDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -21,16 +20,16 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface CardMapper {
     /**
-     * Maps a {@link Card} entity to a {@link CardResponse} DTO.
+     * Maps a {@link Card} entity to a {@link CardDto} DTO.
      *
      * @param entity the card entity to convert
      * @return the mapped response DTO
      */
     @Mapping(source = "user.id", target = "userId")
-    CardResponse mapToResponse(Card entity);
+    CardDto mapToDto(Card entity);
 
     /**
-     * Maps a {@link CreateCardRequest} DTO to a {@link Card} entity.
+     * Maps a {@link CardDto} DTO to a {@link Card} entity.
      * Used during card creation.
      *
      * @param request the DTO containing card creation data
@@ -38,14 +37,14 @@ public interface CardMapper {
      */
     @Mapping(source = "userId", target = "user.id")
     @Mapping(target = "id", ignore = true)
-    Card mapToEntity(CreateCardRequest request);
+    Card mapToEntity(CardDto request);
 
     /**
-     * Maps a list of {@link Card} entities to a list of {@link CardResponse} DTOs.
+     * Maps a list of {@link Card} entities to a list of {@link CardDto} DTOs.
      *
      * @param entities the list of card entities to convert
      * @return the list of mapped response DTOs
      */
-    List<CardResponse> mapToResponseList(List<Card> entities);
+    List<CardDto> mapToDtoList(List<Card> entities);
 
 }
