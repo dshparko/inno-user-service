@@ -6,6 +6,8 @@ import com.innowise.userservice.dto.UserDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -14,7 +16,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(classes = RedisConfig.class)
 class RedisConfigTest {
-
+    @MockitoBean
+    private RedisConnectionFactory redisConnectionFactory;
     @Autowired
     private ObjectMapper redisObjectMapper;
 
