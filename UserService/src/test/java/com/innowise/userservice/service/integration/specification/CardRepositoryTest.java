@@ -61,4 +61,20 @@ class CardRepositoryTest {
         assertThat(result).hasSize(2);
         assertThat(result.get(0).getId()).isEqualTo(card1.getId());
     }
+
+    @Test
+    void testFindAll() {
+        CardDto dto = new CardDto(1L, "1234567890123", "Ivan Ivanov", LocalDate.now().plusYears(1), 1L);
+        CardDto dto2 = new CardDto(2L, "1234532490123", "Valentin Valen", LocalDate.now().plusYears(1), 2L);
+
+        Card card1 = cardRepository.save(cardMapper.mapToEntity(dto));
+        Card card2 = cardRepository.save(cardMapper.mapToEntity(dto2));
+        CardFilterDto filter = new CardFilterDto(null, null, null);
+
+        List<Card> result = cardRepository.findAll(CardSpecification.from(filter));
+
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).getId()).isEqualTo(card1.getId());
+        assertThat(result.get(1).getId()).isEqualTo(card2.getId());
+    }
 }

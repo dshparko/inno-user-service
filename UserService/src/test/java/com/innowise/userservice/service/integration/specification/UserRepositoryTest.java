@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -53,4 +54,15 @@ class UserRepositoryTest {
         assertThat(result).extracting(User::getEmail)
                 .containsExactlyInAnyOrder("darya@example.com", "ivan@example.com");
     }
+
+    @Test
+    void shouldReturnConjunctionWhenIdsIsNull() {
+        UserFilterDto filter = new UserFilterDto(null, null, null);
+
+        Specification<User> spec = UserSpecification.from(filter);
+        List<User> result = userRepository.findAll(spec);
+
+        assertThat(result).hasSize((int) userRepository.count());
+    }
+
 }
