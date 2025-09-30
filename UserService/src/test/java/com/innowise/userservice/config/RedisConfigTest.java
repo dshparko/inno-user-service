@@ -12,7 +12,7 @@ import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-@SpringBootTest
+@SpringBootTest(classes = RedisConfig.class)
 class RedisConfigTest {
 
     @Autowired
