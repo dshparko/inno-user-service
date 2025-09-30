@@ -133,4 +133,22 @@ class CardControllerTest {
         Mockito.verify(cardService).delete(1L);
     }
 
+    @Test
+    @DisplayName("GET /cards with userId and ids should return filtered cards")
+    void findCardsByUserIdAndIds_shouldReturnFilteredList() throws Exception {
+        List<CardDto> cards = List.of(
+                new CardDto(10L, "1234123412341234", "Darya", LocalDate.of(2026, 1, 1), 5L),
+                new CardDto(11L, "5678567856785678", "Ivan", LocalDate.of(2026, 6, 1), 5L)
+        );
+
+        Mockito.when(cardService.findAll(Mockito.any(), Mockito.any())).thenReturn(new PageImpl<>(cards));
+
+        mockMvc.perform(get("/api/v1/cards")
+                        .param("userid", "5")
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value(10))
+                .andExpect(jsonPath("$.content[1].id").value(11));
+    }
+
 }

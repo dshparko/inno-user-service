@@ -24,7 +24,7 @@ public class CardSpecification {
             List<Predicate> predicates = new ArrayList<>();
 
             if (filter.userId() != null) {
-                predicates.add(cb.equal(root.get("userId"), filter.id()));
+                predicates.add(cb.equal(root.get("user").get("id"), filter.userId()));
             }
 
             if (filter.ids() != null && !filter.ids().isEmpty()) {
