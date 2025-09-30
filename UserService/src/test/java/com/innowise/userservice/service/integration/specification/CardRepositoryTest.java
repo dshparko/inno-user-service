@@ -1,4 +1,4 @@
-package com.innowise.userservice.service.unit.specification;
+package com.innowise.userservice.service.integration.specification;
 
 import com.innowise.userservice.database.entity.Card;
 import com.innowise.userservice.database.repository.CardRepository;
