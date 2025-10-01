@@ -60,10 +60,10 @@ class CardServiceTestIT extends IntegrationTestBase {
         CardDto response = cardService.create(request);
 
         assertNotNull(savedUser.getId());
-        assertEquals("1111222233334444", response.number());
+        assertEquals("1111222233334444", response.getNumber());
 
-        Card persisted = cardRepository.findById(response.id())
-                .orElseThrow(() -> new ResourceNotFoundException("Card", response.id()));
+        Card persisted = cardRepository.findById(response.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Card", response.getId()));
 
         assertEquals("Darya", persisted.getHolder());
         assertEquals(savedUser.getId(), persisted.getUser().getId());

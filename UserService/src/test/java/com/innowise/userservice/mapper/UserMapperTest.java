@@ -34,11 +34,11 @@ class UserMapperTest {
 
         UserDto response = userMapper.mapToDto(user);
 
-        assertThat(response.id()).isEqualTo(1L);
-        assertThat(response.name()).isEqualTo("Darya");
-        assertThat(response.surname()).isEqualTo("Shparko");
-        assertThat(response.email()).isEqualTo("darya@example.com");
-        assertThat(response.birthDate()).isEqualTo(LocalDate.of(1990, 1, 1));
+        assertThat(response.getId()).isEqualTo(1L);
+        assertThat(response.getName()).isEqualTo("Darya");
+        assertThat(response.getSurname()).isEqualTo("Shparko");
+        assertThat(response.getEmail()).isEqualTo("darya@example.com");
+        assertThat(response.getBirthDate()).isEqualTo(LocalDate.of(1990, 1, 1));
     }
 
     @Test
@@ -81,9 +81,9 @@ class UserMapperTest {
 
         UserDto response = userMapper.mapToDto(user);
 
-        assertThat(response.id()).isEqualTo(1L);
-        assertThat(response.cards().size() == 1);
-        assertThat(response.cards().getFirst().number()).isEqualTo("1234567891011124");
+        assertThat(response.getId()).isEqualTo(1L);
+        assertThat(response.getCards().size() == 1);
+        assertThat(response.getCards().getFirst().getNumber()).isEqualTo("1234567891011124");
     }
 
     @Test
@@ -100,6 +100,6 @@ class UserMapperTest {
         List<UserDto> responses = userMapper.mapToDtoList(List.of(user));
 
         assertThat(responses.size() == 1);
-        assertThat(responses.getFirst().email()).isEqualTo("darya@example.com");
+        assertThat(responses.getFirst().getEmail()).isEqualTo("darya@example.com");
     }
 }

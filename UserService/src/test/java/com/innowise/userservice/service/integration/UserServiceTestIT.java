@@ -47,11 +47,11 @@ class UserServiceTestIT extends IntegrationTestBase {
 
         UserDto response = userService.create(request);
 
-        assertNotNull(response.id());
-        assertEquals("Darya", response.name());
+        assertNotNull(response.getId());
+        assertEquals("Darya", response.getName());
 
-        User persisted = userRepository.findById(response.id())
-                .orElseThrow(() -> new ResourceNotFoundException("User", response.id()));
+        User persisted = userRepository.findById(response.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User", response.getId()));
 
         assertEquals("darya@example.com", persisted.getEmail());
     }
@@ -68,8 +68,8 @@ class UserServiceTestIT extends IntegrationTestBase {
 
         UserDto response = userService.findById(saved.getId());
 
-        assertEquals("Maria", response.name());
-        assertEquals("maria@example.com", response.email());
+        assertEquals("Maria", response.getName());
+        assertEquals("maria@example.com", response.getEmail());
     }
 
     @Test

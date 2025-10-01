@@ -36,10 +36,10 @@ class CardMapperTest {
 
         CardDto response = cardMapper.mapToDto(card);
 
-        assertThat(response.id()).isEqualTo(1L);
-        assertThat(response.number()).isEqualTo("1234567890123456");
-        assertThat(response.expirationDate()).isEqualTo(LocalDate.of(2030, 12, 31));
-        assertThat(response.userId()).isEqualTo(42L);
+        assertThat(response.getId()).isEqualTo(1L);
+        assertThat(response.getNumber()).isEqualTo("1234567890123456");
+        assertThat(response.getExpirationDate()).isEqualTo(LocalDate.of(2030, 12, 31));
+        assertThat(response.getUserId()).isEqualTo(42L);
     }
 
     @Test
@@ -84,7 +84,7 @@ class CardMapperTest {
         List<CardDto> responses = cardMapper.mapToDtoList(List.of(card1, card2));
 
         assertThat(responses).hasSize(2);
-        assertThat(responses.get(0).userId()).isEqualTo(7L);
-        assertThat(responses.get(1).userId()).isEqualTo(7L);
+        assertThat(responses.get(0).getUserId()).isEqualTo(7L);
+        assertThat(responses.get(1).getUserId()).isEqualTo(7L);
     }
 }

@@ -58,13 +58,13 @@ class UserServiceCacheTestIT extends IntegrationTestBase {
     void findById_ShouldCacheResult() {
         UserDto response1 = userService.findById(savedUser.getId());
 
-        assertEquals("Darya", response1.name());
+        assertEquals("Darya", response1.getName());
 
         savedUser.setName("Changed");
         userRepository.save(savedUser);
 
         UserDto response2 = userService.findById(savedUser.getId());
-        assertEquals("Darya", response2.name());
+        assertEquals("Darya", response2.getName());
     }
 
     @Test
@@ -84,8 +84,8 @@ class UserServiceCacheTestIT extends IntegrationTestBase {
         userService.update(updateRequest);
 
         UserDto response = userService.findById(savedUser.getId());
-        assertEquals("Ivan", response.name());
-        assertEquals("Ivanov", response.surname());
+        assertEquals("Ivan", response.getName());
+        assertEquals("Ivanov", response.getSurname());
     }
 
     @Test
