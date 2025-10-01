@@ -1,0 +1,60 @@
+services:
+  postgres-user:
+    image: postgres:17-alpine3.22
+    container_name: user_service_db
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_user_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:7.2
+    container_name: redis_container
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+  user-service:
+    build:
+      context: .
+      dockerfile: UserService/Dockerfile
+    container_name: user-service
+    restart: unless-stopped
+    ports:
+      - "8083:8083"
+    env_file:
+      - UserService/.env
+    environment:
+
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      SPRING_CACHE_TYPE: redis
+
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-user:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+
+      SERVER_PORT: 8083
+    depends_on:
+      postgres-user:
+        condition: service_healthy
+
+volumes:
+  postgres_user_data:
+  redis_data:
