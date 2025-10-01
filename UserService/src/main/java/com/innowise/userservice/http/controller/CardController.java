@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -38,15 +37,6 @@ import java.util.List;
 public class CardController {
 
     private final CardService cardService;
-
-
-    /**
-     * Retrieves users based on optional filters and pagination parameters.
-     *
-     * @param filter   optional filter criteria (email, id, ids)
-     * @param pageable pagination and sorting configuration
-     * @return paginated list of {@link UserDto} objects; 204 No Content if none found
-     */
 
     /**
      * Retrieves users based on optional filters and pagination parameters.
@@ -106,8 +96,8 @@ public class CardController {
      * @return 200 OK if deletion was successful
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<HttpStatus> delete(@PathVariable("id") Long id) {
+    public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
         cardService.delete(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }

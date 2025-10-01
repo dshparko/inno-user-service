@@ -12,6 +12,9 @@ import com.innowise.userservice.http.exception.ResourceNotFoundException;
 import com.innowise.userservice.mapper.CardMapper;
 import com.innowise.userservice.service.CardCrudService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -31,16 +34,11 @@ import java.util.List;
 @Transactional(readOnly = true)
 @Service
 @RequiredArgsConstructor
-public class CardService implements CardCrudService<CardDto> {
+public class CardService implements CardCrudService{
 
     private final CardRepository cardRepository;
     private final UserRepository userRepository;
     private final CardMapper cardMapper;
-
-    public Page<CardDto> searchCards(CardFilterDto filter, Pageable pageable) {
-        return cardRepository.findAll(CardSpecification.from(filter), pageable)
-                .map(cardMapper::mapToDto);
-    }
 
     /**
      * Creates a new card based on the provided request DTO.
@@ -53,8 +51,8 @@ public class CardService implements CardCrudService<CardDto> {
     public CardDto create(CardDto request) {
         Card card = cardMapper.mapToEntity(request);
 
-        User user = userRepository.findById(request.userId())
-                .orElseThrow(() -> new ResourceNotFoundException("User", request.userId()));
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User", request.getUserId()));
 
         user.addCard(card);
         return cardMapper.mapToDto(cardRepository.save(card));
@@ -68,6 +66,7 @@ public class CardService implements CardCrudService<CardDto> {
      * @throws ResourceNotFoundException if no card exists with the given ID
      */
     @Override
+    @Cacheable(value = "card", key = "#id")
     public CardDto findById(Long id) {
         Card card = cardRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Card", id));
@@ -95,24 +94,27 @@ public class CardService implements CardCrudService<CardDto> {
      */
     @Transactional
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "card", key = "#request.id()")
+    })
     public void update(CardDto request) {
-        if (!cardRepository.existsById(request.id())) {
-            throw new ResourceNotFoundException("Card", request.id());
+        if (!cardRepository.existsById(request.getId())) {
+            throw new ResourceNotFoundException("Card", request.getId());
         }
 
-        User user = userRepository.findById(request.userId())
-                .orElseThrow(() -> new ResourceNotFoundException("User", request.userId()));
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User", request.getUserId()));
 
         int updated = cardRepository.updateCardById(
-                request.id(),
+                request.getId(),
                 user.getId(),
-                request.number(),
-                request.holder(),
-                request.expirationDate()
+                request.getNumber(),
+                request.getHolder(),
+                request.getExpirationDate()
         );
 
         if (updated == 0) {
-            throw new ModificationException("Card", request.id());
+            throw new ModificationException("Card", request.getId());
         }
     }
 
@@ -125,6 +127,7 @@ public class CardService implements CardCrudService<CardDto> {
      */
     @Transactional
     @Override
+    @CacheEvict(value = "card", key = "#id")
     public void delete(Long id) {
         Card card = cardRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Card", id));

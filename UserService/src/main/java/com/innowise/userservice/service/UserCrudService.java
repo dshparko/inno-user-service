@@ -1,11 +1,13 @@
 package com.innowise.userservice.service;
+
+import com.innowise.userservice.dto.UserDto;
+
 /**
  * Extension of {@link CrudService} for user-specific operations.
  * Adds domain-specific lookup capabilities beyond basic CRUD.
  *
- * @param <T> the type of the user DTO or entity managed by the service
  */
-public interface UserCrudService<T> extends CrudService<T> {
+public interface UserCrudService extends CrudService<UserDto> {
 
     /**
      * Retrieves a user by their email address.
@@ -13,5 +15,5 @@ public interface UserCrudService<T> extends CrudService<T> {
      * @param email the email address to search for
      * @return the user associated with the given email
      */
-    T findByEmail(String email);
+    UserDto findByEmail(String email);
 }

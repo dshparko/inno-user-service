@@ -4,7 +4,12 @@ import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
 /**
@@ -16,20 +21,26 @@ import java.time.LocalDate;
  * @Date 08.09.2025 21:30
  * @Version 1.0
  */
-public record CardDto(
-        @NotNull(message = "Сard ID is required")
-        Long id,
+@AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+public class CardDto implements Serializable {
 
-        @NotBlank(message = "Card number is required")
-        @Pattern(regexp = "^\\d{13,19}$", message = "The number should be between 13 and 19 digits")
-        String number,
+    @NotNull(message = "Card ID is required")
+    private Long id;
 
-        @NotBlank(message = "Holder name is required")
-        String holder,
+    @NotBlank(message = "Card number is required")
+    @Pattern(regexp = "^\\d{13,19}$", message = "The number should be between 13 and 19 digits")
+    private String number;
 
-        @Future(message = "Expiration date must be in the future")
-        LocalDate expirationDate,
+    @NotBlank(message = "Holder name is required")
+    private String holder;
 
-        @NotNull(message = "User ID is required")
-        Long userId) {
+    @Future(message = "Expiration date must be in the future")
+    private LocalDate expirationDate;
+
+    @NotNull(message = "User ID is required")
+    private Long userId;
+
 }

@@ -34,7 +34,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
-public class UserService implements UserCrudService<UserDto> {
+public class UserService implements UserCrudService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
@@ -108,19 +108,19 @@ public class UserService implements UserCrudService<UserDto> {
     @Transactional
     @Override
     public void update(UserDto request) {
-        User user = userRepository.findById(request.id())
-                .orElseThrow(() -> new ResourceNotFoundException("User", request.id()));
+        User user = userRepository.findById(request.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User", request.getId()));
 
         int updated = userRepository.updateUserById(
                 user.getId(),
-                request.name(),
-                request.surname(),
-                request.email(),
-                request.birthDate()
+                request.getName(),
+                request.getSurname(),
+                request.getEmail(),
+                request.getBirthDate()
         );
 
         if (updated == 0) {
-            throw new ModificationException("User", request.id());
+            throw new ModificationException("User", request.getId());
         }
     }
 

@@ -107,7 +107,7 @@ class CardControllerTest {
 
     @Test
     @DisplayName("PUT /cards should update a card")
-    void updateCard_shouldReturnOk() throws Exception {
+    void updateCard_shouldReturnIsOk() throws Exception {
         CardDto request = new CardDto(
                 1L,
                 "9999888877776666",
@@ -126,9 +126,9 @@ class CardControllerTest {
 
     @Test
     @DisplayName("DELETE /cards/{id} should delete card")
-    void deleteCard_shouldReturnOk() throws Exception {
+    void deleteCard_shouldReturnNoContent() throws Exception {
         mockMvc.perform(delete("/api/v1/cards/1"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         Mockito.verify(cardService).delete(1L);
     }

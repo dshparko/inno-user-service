@@ -111,7 +111,7 @@ class UserControllerTest {
     @DisplayName("POST /users should create a user")
     void createUser_shouldReturnCreatedUser() throws Exception {
         UserDto request = new UserDto(
-                1l,
+                1L,
                 "Darya",
                 "Shparko",
                 "darya@example.com",
@@ -150,9 +150,9 @@ class UserControllerTest {
 
     @Test
     @DisplayName("DELETE /users/{id} should delete user")
-    void deleteUser_shouldReturnOk() throws Exception {
+    void deleteUser_shouldReturnNoContent() throws Exception {
         mockMvc.perform(delete("/api/v1/users/1"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         Mockito.verify(userService).delete(1L);
     }

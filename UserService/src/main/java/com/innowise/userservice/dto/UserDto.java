@@ -5,6 +5,10 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -19,24 +23,29 @@ import java.util.List;
  * @Date 16.09.2025 10:57
  * @Version 1.0
  */
-public record UserDto(
-        @NotNull(message = "User ID is required")
-        Long id,
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+public class UserDto implements Serializable {
 
-        @NotBlank(message = "Name is required")
-        String name,
+    @NotNull(message = "User ID is required")
+    private Long id;
 
-        @NotBlank(message = "Surname is required")
-        String surname,
+    @NotBlank(message = "Name is required")
+    private String name;
 
-        @Email(message = "Email must be valid")
-        @NotBlank(message = "Email is required")
-        String email,
+    @NotBlank(message = "Surname is required")
+    private String surname;
 
-        @Past(message = "Birth date must be in the past")
-        @JsonFormat(pattern = "yyyy-MM-dd")
-        LocalDate birthDate,
+    @Email(message = "Email must be valid")
+    @NotBlank(message = "Email is required")
+    private String email;
 
-        List<CardDto> cards
-) implements Serializable {
+    @Past(message = "Birth date must be in the past")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate birthDate;
+
+    private List<CardDto> cards;
+
 }
