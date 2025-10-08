@@ -2,6 +2,7 @@ package com.innowise.userservice.http.exception;
 
 import lombok.Getter;
 
+import java.io.Serial;
 import java.util.UUID;
 
 /**
@@ -13,11 +14,11 @@ import java.util.UUID;
  */
 public class ResourceNotFoundException extends RuntimeException {
     @Getter
-    private final UUID errorId;
+    @Serial
+    private final UUID errorId = UUID.randomUUID();
 
     public ResourceNotFoundException(String type, Object identifier) {
         super(type + " with identifier " + identifier + " wasn't found");
-        this.errorId = UUID.randomUUID();
     }
 }
 

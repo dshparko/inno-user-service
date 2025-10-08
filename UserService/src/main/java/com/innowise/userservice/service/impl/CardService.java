@@ -151,6 +151,7 @@ public class CardService implements CardCrudService{
         return cardMapper.mapToDtoList(cardRepository.findAll());
     }
 
+    @Override
     public Page<CardDto> findAll(CardFilterDto filter, Pageable pageable) {
         Page<Card> cardsPage = cardRepository.findAll(CardSpecification.from(filter), pageable);
 

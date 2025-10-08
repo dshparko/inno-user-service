@@ -3,13 +3,15 @@ package com.innowise.userservice.http.controller;
 import com.innowise.userservice.dto.CardDto;
 import com.innowise.userservice.dto.CardFilterDto;
 import com.innowise.userservice.dto.UserDto;
-import com.innowise.userservice.service.impl.CardService;
+import com.innowise.userservice.service.CardCrudService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,7 +38,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CardController {
 
-    private final CardService cardService;
+    private final CardCrudService cardService;
+
+    @GetMapping("/{id}")
+    @PreAuthorize(value = "hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<CardDto> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(cardService.findById(id));
+    }
 
     /**
      * Retrieves users based on optional filters and pagination parameters.
@@ -46,14 +54,12 @@ public class CardController {
      * @return paginated list of {@link UserDto} objects; 204 No Content if none found
      */
     @GetMapping
-    public ResponseEntity<Page<CardDto>> search(CardFilterDto filter, Pageable pageable) {
+    @PreAuthorize(value = "hasRole('ADMIN')")
+    public ResponseEntity<Page<CardDto>> search(CardFilterDto filter,
+                                                @PageableDefault Pageable pageable) {
         Page<CardDto> page;
 
-        if (filter.id() != null) {
-            CardDto card = cardService.findById(filter.id());
-            List<CardDto> list = card != null ? List.of(card) : List.of();
-            page = new PageImpl<>(list, pageable, list.size());
-        } else if (filter.userId() != null) {
+        if (filter.userId() != null) {
             List<CardDto> cards = cardService.findByUserId(filter.userId());
             page = new PageImpl<>(cards, pageable, cards.size());
         } else {
@@ -72,6 +78,7 @@ public class CardController {
      * @param request DTO containing card creation data
      * @return {@link CardDto} representing the newly created card
      */
+    @PreAuthorize(value = "hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<CardDto> createCard(@RequestBody @Valid CardDto request) {
         return ResponseEntity.ok(cardService.create(request));
@@ -83,6 +90,7 @@ public class CardController {
      * @param request DTO containing updated card data
      * @return 200 OK if update was successful
      */
+    @PreAuthorize(value = "hasRole('ADMIN')")
     @PutMapping
     public ResponseEntity<CardDto> updateCard(@RequestBody @Valid CardDto request) {
         cardService.update(request);
@@ -95,6 +103,7 @@ public class CardController {
      * @param id the ID of the card to delete
      * @return 200 OK if deletion was successful
      */
+    @PreAuthorize(value = "hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
         cardService.delete(id);

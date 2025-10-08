@@ -2,13 +2,15 @@ package com.innowise.userservice.http.controller;
 
 import com.innowise.userservice.dto.UserDto;
 import com.innowise.userservice.dto.UserFilterDto;
-import com.innowise.userservice.service.impl.UserService;
+import com.innowise.userservice.service.UserCrudService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,7 +37,13 @@ import java.util.List;
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 public class UserController {
-    private final UserService userService;
+    private final UserCrudService userService;
+
+    @PreAuthorize(value = "hasRole('USER') or hasRole('ADMIN')")
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDto> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.findById(id));
+    }
 
     /**
      * Retrieves users based on optional filters and pagination parameters.
@@ -45,14 +53,12 @@ public class UserController {
      * @return paginated list of {@link UserDto} objects; 204 No Content if none found
      */
     @GetMapping
-    public ResponseEntity<Page<UserDto>> search(UserFilterDto filter, Pageable pageable) {
+    @PreAuthorize(value = "hasRole('ADMIN')")
+    public ResponseEntity<Page<UserDto>> search(UserFilterDto filter,
+                                                @PageableDefault Pageable pageable) {
         Page<UserDto> page;
 
-        if (filter.id() != null) {
-            UserDto user = userService.findById(filter.id());
-            List<UserDto> list = user != null ? List.of(user) : List.of();
-            page = new PageImpl<>(list, pageable, list.size());
-        } else if (filter.email() != null && !filter.email().isBlank()) {
+        if (filter.email() != null && !filter.email().isBlank()) {
             UserDto user = userService.findByEmail(filter.email());
             List<UserDto> list = user != null ? List.of(user) : List.of();
             page = new PageImpl<>(list, pageable, list.size());
@@ -71,6 +77,7 @@ public class UserController {
      * @param user DTO containing user creation data
      * @return {@link UserDto} representing the newly created user
      */
+    @PreAuthorize(value = "hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<UserDto> createUser(@RequestBody @Valid UserDto user) {
         return ResponseEntity.ok(userService.create(user));
@@ -83,6 +90,7 @@ public class UserController {
      * @return 200 OK if update was successful
      */
     @PutMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> updateUser(@RequestBody @Valid UserDto user) {
         userService.update(user);
         return ResponseEntity.ok().build();
@@ -95,6 +103,7 @@ public class UserController {
      * @return 200 OK if deletion was successful
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteUser(@PathVariable("id") Long id) {
         userService.delete(id);
         return ResponseEntity.noContent().build();

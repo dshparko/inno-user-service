@@ -152,6 +152,7 @@ public class UserService implements UserCrudService {
     }
 
 
+    @Override
     public Page<UserDto> findAll(UserFilterDto filter, Pageable pageable) {
         Page<User> usersPage = userRepository.findAll(UserSpecification.from(filter), pageable);
 

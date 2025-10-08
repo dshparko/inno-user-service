@@ -1,6 +1,9 @@
 package com.innowise.userservice.service;
 
 import com.innowise.userservice.dto.CardDto;
+import com.innowise.userservice.dto.CardFilterDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -18,4 +21,6 @@ public interface CardCrudService extends CrudService<CardDto> {
      * @return a list of cards linked to the given user ID
      */
     List<CardDto> findByUserId(Long id);
+
+    Page<CardDto> findAll(CardFilterDto filterDto, Pageable pageable);
 }
