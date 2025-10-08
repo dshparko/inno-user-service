@@ -1,9 +1,9 @@
 FROM maven:3.9.6-eclipse-temurin-21 AS builder
 WORKDIR /app
 
-COPY UserService/pom.xml ./
+COPY pom.xml ./
 
-COPY UserService/src ./src
+COPY src ./src
 RUN mvn clean package -DskipTests=true
 
 FROM eclipse-temurin:21-jre-alpine
