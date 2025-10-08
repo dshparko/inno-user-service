@@ -93,7 +93,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .getBody();
 
         String role = claims.get("role", String.class);
-        if (role == null) {
+        if (role == null || role.isBlank()) {
             return Collections.emptyList();
         }
 
