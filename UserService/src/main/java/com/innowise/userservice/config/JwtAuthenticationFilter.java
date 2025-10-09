@@ -44,10 +44,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
-        String token = extractToken(request);
-        if (token != null) {
-            Claims claims = parseClaims(token);
-            if (claims != null) {
+        try {
+            String token = extractToken(request);
+            if (token != null) {
+                Claims claims = parseClaims(token);
                 String username = claims.getSubject();
                 List<GrantedAuthority> authorities = extractRoles(claims);
 
@@ -56,8 +56,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
+            filterChain.doFilter(request, response);
+        } catch (AuthenticationException ex) {
+            SecurityContextHolder.clearContext();
+            request.setAttribute("SPRING_SECURITY_LAST_EXCEPTION", ex);
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
         }
-        filterChain.doFilter(request, response);
     }
 
     private String extractToken(HttpServletRequest request) {
