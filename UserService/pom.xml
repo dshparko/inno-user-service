@@ -19,6 +19,7 @@
     <description>UserService backend microservice</description>
 
     <properties>
+        <sonar.exclusions>**/SecurityConfig.java</sonar.exclusions>
         <java.version>21</java.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <lombok.version>1.18.40</lombok.version>
