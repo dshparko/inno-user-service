@@ -1,6 +1,9 @@
 package com.innowise.userservice.service;
 
 import com.innowise.userservice.dto.UserDto;
+import com.innowise.userservice.dto.UserFilterDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Extension of {@link CrudService} for user-specific operations.
@@ -16,4 +19,7 @@ public interface UserCrudService extends CrudService<UserDto> {
      * @return the user associated with the given email
      */
     UserDto findByEmail(String email);
+
+    Page<UserDto> findAll(UserFilterDto filterDto, Pageable pageable);
+
 }

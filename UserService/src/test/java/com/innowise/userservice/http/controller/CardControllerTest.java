@@ -1,16 +1,20 @@
 package com.innowise.userservice.http.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.innowise.userservice.config.SecurityConfig;
 import com.innowise.userservice.dto.CardDto;
+import com.innowise.userservice.http.exception.JwtAuthenticationEntryPoint;
 import com.innowise.userservice.service.impl.CardService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -26,6 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(CardController.class)
+@Import({SecurityConfig.class})
 class CardControllerTest {
 
     @Autowired
@@ -33,6 +38,9 @@ class CardControllerTest {
 
     @MockitoBean
     private CardService cardService;
+
+    @MockitoBean
+    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -45,17 +53,19 @@ class CardControllerTest {
             42L
     );
 
+    @WithMockUser(username = "testuser", roles = {"USER"})
     @Test
     @DisplayName("GET /cards/{id} should return card by ID")
     void getCardById_shouldReturnCard() throws Exception {
         Mockito.when(cardService.findById(1L)).thenReturn(sampleCard);
 
-        mockMvc.perform(get("/api/v1/cards?id=1"))
+        mockMvc.perform(get("/api/v1/cards/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].id").value(1L))
-                .andExpect(jsonPath("$.content[0].number").value("1234567890123456"));
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.number").value("1234567890123456"));
     }
 
+    @WithMockUser(username = "testuser", roles = {"ADMIN"})
     @Test
     @DisplayName("GET /cards should return all cards")
     void findAll_shouldReturnList() throws Exception {
@@ -66,6 +76,7 @@ class CardControllerTest {
                 .andExpect(jsonPath("$.content[0].id").value(1L));
     }
 
+    @WithMockUser(username = "testuser", roles = {"ADMIN"})
     @Test
     @DisplayName("GET /cards should return 204 if empty")
     void findAll_shouldReturnNoContent() throws Exception {
@@ -75,6 +86,7 @@ class CardControllerTest {
                 .andExpect(status().isNoContent());
     }
 
+    @WithMockUser(username = "testuser", roles = {"ADMIN"})
     @Test
     @DisplayName("GET /cards/batch should return cards by IDs")
     void findCardsByIds_shouldReturnList() throws Exception {
@@ -85,6 +97,7 @@ class CardControllerTest {
                 .andExpect(jsonPath("$.content[0].id").value(1L));
     }
 
+    @WithMockUser(username = "testuser", roles = {"ADMIN"})
     @Test
     @DisplayName("POST /cards should create a card")
     void createCard_shouldReturnCreatedCard() throws Exception {
@@ -105,6 +118,7 @@ class CardControllerTest {
                 .andExpect(jsonPath("$.id").value(1L));
     }
 
+    @WithMockUser(username = "testuser", roles = {"ADMIN"})
     @Test
     @DisplayName("PUT /cards should update a card")
     void updateCard_shouldReturnIsOk() throws Exception {
@@ -124,6 +138,7 @@ class CardControllerTest {
         Mockito.verify(cardService).update(request);
     }
 
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
     @Test
     @DisplayName("DELETE /cards/{id} should delete card")
     void deleteCard_shouldReturnNoContent() throws Exception {
@@ -133,6 +148,7 @@ class CardControllerTest {
         Mockito.verify(cardService).delete(1L);
     }
 
+    @WithMockUser(username = "testuser", roles = {"ADMIN"})
     @Test
     @DisplayName("GET /cards with userId and ids should return filtered cards")
     void findCardsByUserIdAndIds_shouldReturnFilteredList() throws Exception {

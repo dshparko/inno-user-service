@@ -19,12 +19,14 @@
     <description>UserService backend microservice</description>
 
     <properties>
+        <sonar.exclusions>**/SecurityConfig.java</sonar.exclusions>
         <java.version>21</java.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <lombok.version>1.18.40</lombok.version>
         <lombok.mapstruct.binding.version>0.2.0</lombok.mapstruct.binding.version>
         <postgresql.version>42.5.0</postgresql.version>
         <maven.compiler.plugin.version>3.11.0</maven.compiler.plugin.version>
+        <jjwt.version>0.11.5</jjwt.version>
     </properties>
 
     <dependencies>
@@ -103,13 +105,35 @@
             <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-hateoas</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>${jjwt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 
@@ -122,6 +146,7 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
+                    <release>${java.version}</release>
                     <compilerArgs>
                         <arg>--enable-preview</arg>
                         <arg>-Amapstruct.defaultComponentModel=spring</arg>
