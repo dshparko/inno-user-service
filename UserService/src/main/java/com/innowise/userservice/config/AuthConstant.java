@@ -14,4 +14,5 @@ public final class AuthConstant {
     public static final String AUTH_HEADER = "Authorization";
     public static final String TOKEN_PREFIX = "Bearer ";
     public static final String ROLE_PREFIX = "ROLE_";
+    public static final String CONTENT_TYPE = "application/json";
 }

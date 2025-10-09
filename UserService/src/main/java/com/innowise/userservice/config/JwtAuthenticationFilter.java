@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -44,65 +45,52 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
         String token = extractToken(request);
-        if (token != null && validateToken(token)) {
-            String username = extractUsername(token);
-            List<GrantedAuthority> authorities = extractRoles(token);
+        if (token != null) {
+            Claims claims = parseClaims(token);
+            if (claims != null) {
+                String username = claims.getSubject();
+                List<GrantedAuthority> authorities = extractRoles(claims);
 
-            UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(username, null, authorities);
+                UsernamePasswordAuthenticationToken auth =
+                        new UsernamePasswordAuthenticationToken(username, null, authorities);
 
-            SecurityContextHolder.getContext().setAuthentication(auth);
+                SecurityContextHolder.getContext().setAuthentication(auth);
+            }
         }
         filterChain.doFilter(request, response);
     }
 
     private String extractToken(HttpServletRequest request) {
         String authHeader = request.getHeader(AUTH_HEADER);
-        if (authHeader != null && authHeader.startsWith(TOKEN_PREFIX)) {
-            return authHeader.substring(7);
-        }
-        return null;
+        return (authHeader != null && authHeader.startsWith(TOKEN_PREFIX))
+                ? authHeader.substring(TOKEN_PREFIX.length())
+                : null;
     }
 
-    private boolean validateToken(String token) {
+    private Claims parseClaims(String token) {
         try {
-            Jwts.parserBuilder()
-                    .setSigningKey(getSigningKey())
-                    .build()
-                    .parseClaimsJws(token);
-            return true;
+            return jwtParser().parseClaimsJws(token).getBody();
         } catch (JwtException | IllegalArgumentException e) {
-            return false;
+            throw new AuthenticationException("Invalid JWT: " + e.getMessage()) {
+            };
         }
     }
 
-    private String extractUsername(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.getSubject();
-    }
-
-    private List<GrantedAuthority> extractRoles(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-
+    private List<GrantedAuthority> extractRoles(Claims claims) {
         String role = claims.get("role", String.class);
-        if (role == null || role.isBlank()) {
-            return Collections.emptyList();
-        }
-
-        return List.of(new SimpleGrantedAuthority(ROLE_PREFIX + role));
+        return (role == null || role.isBlank())
+                ? Collections.emptyList()
+                : List.of(new SimpleGrantedAuthority(ROLE_PREFIX + role));
     }
 
     private Key getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
-}
 
+    private io.jsonwebtoken.JwtParser jwtParser() {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build();
+    }
+}
