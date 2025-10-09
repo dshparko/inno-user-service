@@ -3,6 +3,7 @@ package com.innowise.userservice.http.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.innowise.userservice.config.SecurityConfig;
 import com.innowise.userservice.dto.UserDto;
+import com.innowise.userservice.http.exception.JwtAuthenticationEntryPoint;
 import com.innowise.userservice.http.exception.ResourceNotFoundException;
 import com.innowise.userservice.service.impl.UserService;
 import org.junit.jupiter.api.DisplayName;
@@ -38,6 +39,9 @@ class UserControllerTest {
 
     @MockitoBean
     private UserService userService;
+
+    @MockitoBean
+    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Autowired
     private ObjectMapper objectMapper;

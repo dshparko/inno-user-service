@@ -3,6 +3,7 @@ package com.innowise.userservice.http.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.innowise.userservice.config.SecurityConfig;
 import com.innowise.userservice.dto.CardDto;
+import com.innowise.userservice.http.exception.JwtAuthenticationEntryPoint;
 import com.innowise.userservice.service.impl.CardService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,9 @@ class CardControllerTest {
 
     @MockitoBean
     private CardService cardService;
+
+    @MockitoBean
+    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Autowired
     private ObjectMapper objectMapper;
