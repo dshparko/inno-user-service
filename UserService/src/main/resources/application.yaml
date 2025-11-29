@@ -4,7 +4,7 @@ spring:
   application:
     name: UserService
   datasource:
-    url: ${DB_URL}
+    url: ${USER_DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
@@ -34,7 +34,23 @@ spring:
 
 logging:
   level:
+    org.springframework: DEBUG
     org.springframework.data.redis: DEBUG
     io.lettuce.core: DEBUG
 jwt:
   secret: ${JWT_SECRET}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
